@@ -1,6 +1,6 @@
 {
   "development": {
-    "storage":"./db/dev.db",
+    "storage":"db/dev.db",
     "username": "root",
     "password": null,
     "database": "database_development",

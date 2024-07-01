@@ -22,9 +22,9 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false,
       unique:true
     },
-    Img: DataTypes.STRING,
-    Desc:{type:DataTypes.STRING,
-      allowNull:false
+    Img: {type:DataTypes.STRING,
+      allowNull:false,
+      unique:true
     }
   }, {
     sequelize,

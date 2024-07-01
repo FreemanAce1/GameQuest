@@ -1,41 +1,40 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  class Genres extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
+  class Genre extends Model {
     static associate(models) {
-      // define association here
+      // define association here (e.g., with your Game model)
     }
   }
-  Genres.init({
-    Action: DataTypes.INTEGER,
-    Indie: DataTypes.INTEGER,
+
+  Genre.init({
     Adventure: DataTypes.INTEGER,
-    RPG: DataTypes.INTEGER,
-    Strategy: DataTypes.INTEGER,
-    Shooter: DataTypes.INTEGER,
-    Casual: DataTypes.INTEGER,
-    Simulation: DataTypes.INTEGER,
-    Puzzle: DataTypes.INTEGER,
+    Indie: DataTypes.INTEGER,
     Arcade: DataTypes.INTEGER,
-    Platformer: DataTypes.INTEGER,
-    Racing: DataTypes.INTEGER,
-    MassivelyMultiplayer: DataTypes.INTEGER,
-    Sports: DataTypes.INTEGER,
+    Visual_Novel: DataTypes.INTEGER,
+    Card_and_Board_Game: DataTypes.INTEGER,
+    MOBA: DataTypes.INTEGER,
+    Point_and_click: DataTypes.INTEGER,
     Fighting: DataTypes.INTEGER,
-    Family: DataTypes.INTEGER,
-    BoardGames: DataTypes.INTEGER,
-    Educational: DataTypes.INTEGER,
-    Card: DataTypes.INTEGER
+    Shooter: DataTypes.INTEGER,
+    Music: DataTypes.INTEGER,
+    Platform: DataTypes.INTEGER,
+    Puzzle: DataTypes.INTEGER,
+    Racing: DataTypes.INTEGER,
+    Real_Time_Strategy_RTS: DataTypes.INTEGER,
+    Role_playing_RPG: DataTypes.INTEGER,
+    Simulator: DataTypes.INTEGER,
+    Sport: DataTypes.INTEGER,
+    Strategy: DataTypes.INTEGER,
+    Turn_based_strategy_TBS: DataTypes.INTEGER,
+    Tactical: DataTypes.INTEGER,
+    Hack_and_slash_Beat_em_up: DataTypes.INTEGER,
   }, {
     sequelize,
-    modelName: 'Genres',
+    modelName: 'Genre',
   });
-  return Genres;
+
+  return Genre;
 };

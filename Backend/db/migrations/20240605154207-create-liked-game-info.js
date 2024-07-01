@@ -20,11 +20,9 @@ module.exports = {
       unique:true
       },
       Img: {
-        type: Sequelize.STRING
-      },
-      Desc: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull:false,
+      unique:true
       },
       createdAt: {
         allowNull: false,

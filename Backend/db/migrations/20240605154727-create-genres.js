@@ -1,4 +1,5 @@
 'use strict';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -9,75 +10,83 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      Action: {
+      Adventure: {
         type: Sequelize.INTEGER
       },
       Indie: {
         type: Sequelize.INTEGER
       },
-      Adventure: {
-        type: Sequelize.INTEGER
-      },
-      RPG: {
-        type: Sequelize.INTEGER
-      },
-      Strategy: {
-        type: Sequelize.INTEGER
-      },
-      Shooter: {
-        type: Sequelize.INTEGER
-      },
-      Casual: {
-        type: Sequelize.INTEGER
-      },
-      Simulation: {
-        type: Sequelize.INTEGER
-      },
-      Puzzle: {
-        type: Sequelize.INTEGER
-      },
       Arcade: {
         type: Sequelize.INTEGER
       },
-      Platformer: {
+      Visual_Novel: {
         type: Sequelize.INTEGER
       },
-      Racing: {
+      Card_and_Board_Game: {
         type: Sequelize.INTEGER
       },
-      MassivelyMultiplayer: {
+      MOBA: {
         type: Sequelize.INTEGER
       },
-      Sports: {
+      Point_and_click: {
         type: Sequelize.INTEGER
       },
       Fighting: {
         type: Sequelize.INTEGER
       },
-      Family: {
+      Shooter: {
         type: Sequelize.INTEGER
       },
-      BoardGames: {
+      Music: {
         type: Sequelize.INTEGER
       },
-      Educational: {
+      Platform: {
         type: Sequelize.INTEGER
       },
-      Card: {
+      Puzzle: {
+        type: Sequelize.INTEGER
+      },
+      Racing: {
+        type: Sequelize.INTEGER
+      },
+      Real_Time_Strategy_RTS: {
+        type: Sequelize.INTEGER
+      },
+      Role_playing_RPG: {
+        type: Sequelize.INTEGER
+      },
+      Simulator: {
+        type: Sequelize.INTEGER
+      },
+      Sport: {
+        type: Sequelize.INTEGER
+      },
+      Strategy: {
+        type: Sequelize.INTEGER
+      },
+      Turn_based_strategy_TBS: {
+        type: Sequelize.INTEGER
+      },
+      Tactical: {
+        type: Sequelize.INTEGER
+      },
+      Hack_and_slash_Beat_em_up: {
         type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue:Sequelize.literal('CURRENT_TIMESTAMP')
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue:Sequelize.literal('CURRENT_TIMESTAMP')
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       }
-    });
+    },{
+      truncate: true });
   },
+
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Genres');
   }
