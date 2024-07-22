@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  backend:
+    build: ./Backend   
+    ports:
+      - 5000:5000    
+    volumes:
+      - ./Backend/db:/db 
+    environment:
+      - DATABASE_URL=sqlite3:///db/dev.db  
+  frontend:
+    build: ./FrontEnd/GameQuest   
+    ports:
+      - 5173:5173    
+    depends_on:
+      - backend 

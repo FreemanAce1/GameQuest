@@ -568,7 +568,7 @@ app.get('/RecentlyLikedGames', async (req, res) => {
 
 
 db.sequelize.sync().then(() => {
-  app.listen(5000, () => {
+  app.listen(5000,'0.0.0.0', () => {
     console.log(`server is up and running on port 5000`);
   });
 });
