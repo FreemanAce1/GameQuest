@@ -11,18 +11,27 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Platform.belongsTo(models.User,{foreignKey:'UserId'})
     }
   }
   Platform.init({
-    PC: DataTypes.BOOLEAN,
-    PlayStation_5: DataTypes.BOOLEAN,
-    Xbox_Series_XS: DataTypes.BOOLEAN,
-    Nintendo_Switch: DataTypes.BOOLEAN,
-    Xbox_One: DataTypes.BOOLEAN,
-    Oculus_Quest: DataTypes.BOOLEAN,
-    PlayStation_VR2: DataTypes.BOOLEAN,
-    Meta_Quest_2: DataTypes.BOOLEAN,
-    PlayStation_4: DataTypes.BOOLEAN
+    UserId: { 
+      type: DataTypes.STRING,
+      allowNull: false,
+      references: { 
+          model: 'Users', 
+          key: 'id' 
+      }
+  },
+    PC:{ type: DataTypes.BOOLEAN, defaultValue: false },
+    PlayStation_5:{ type: DataTypes.BOOLEAN, defaultValue: false },
+    Xbox_Series_XS: { type: DataTypes.BOOLEAN, defaultValue: false },
+    Nintendo_Switch: { type: DataTypes.BOOLEAN, defaultValue: false },
+    Xbox_One: { type: DataTypes.BOOLEAN, defaultValue: false },
+    Oculus_Quest: { type: DataTypes.BOOLEAN, defaultValue: false },
+    PlayStation_VR2: { type: DataTypes.BOOLEAN, defaultValue: false },
+    Meta_Quest_2: { type: DataTypes.BOOLEAN, defaultValue: false },
+    PlayStation_4:{ type: DataTypes.BOOLEAN, defaultValue: false },
   }, {
     sequelize,
     modelName: 'Platform',

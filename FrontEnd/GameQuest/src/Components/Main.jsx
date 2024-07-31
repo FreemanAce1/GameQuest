@@ -1,4 +1,4 @@
-import { useState  } from 'react'
+import { useEffect, useState  } from 'react'
 import { motion,useScroll, useTransform } from "framer-motion"
 import {ReactTyped} from 'react-typed'
 
@@ -19,6 +19,22 @@ function Main() {
   const { scrollYProgress } = useScroll();
   const logoRotate = useTransform(scrollYProgress, [0, 0.3], [0, 10]);
   const logoYMove = useTransform(scrollYProgress, [0,0.3],[0,-200])
+
+  useEffect(() => {
+
+   let userId = localStorage.getItem('userId')
+   if(!userId){
+    userId = crypto.randomUUID()
+    localStorage.setItem('userId',userId)
+    fetch('http://localhost:5000/newUser',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-user-id':userId
+      }
+    })
+   } 
+  })
 
 
   return (

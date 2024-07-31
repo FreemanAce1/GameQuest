@@ -12,13 +12,15 @@ function GameDetails(){
     // gameDetails.trailer = `https://www.youtube.com/watch?v=${gameDetails[0].videos[0]}`
     console.log(gameDetails)
     const [liked, SetLiked] = useState(false)
+
+
    const  LikeGame =  async () =>{
     // const { GameId, Name, Img, Desc, Genres } = req.body
     const preferenceBody = {GameId:gameDetails[0].id,Name:gameDetails[0].name,Img:gameDetails[0].hero,Themes:gameDetails[0].themes,Genres:gameDetails[0].genres}
     SetLiked(true)
     await fetch(`http://localhost:5000/LikeGame`, {
         method:'POST',
-        headers: {'Content-Type':'application/json'},
+        headers: {'Content-Type':'application/json','userId':localStorage.getItem('userId')},
         body:JSON.stringify(preferenceBody)
       })
       .then(data => data.json())

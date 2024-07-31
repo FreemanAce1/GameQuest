@@ -8,10 +8,15 @@ services:
     volumes:
       - ./Backend/db:/db 
     environment:
-      - DATABASE_URL=sqlite3:///db/dev.db  
+      - DATABASE_URL=sqlite3:///db/dev.db
+      - BACKEND_URL=http://backend:5000
+    command: npm start --host 0.0.0.0   
   frontend:
     build: ./FrontEnd/GameQuest   
     ports:
-      - 5173:5173    
+      - 5173:5173
+    volumes:
+    - ./frontend:/app
+    - ./frontend/.env:/app/.env    
     depends_on:
       - backend 

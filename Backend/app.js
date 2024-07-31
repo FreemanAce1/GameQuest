@@ -3,24 +3,33 @@ const cors = require("cors");
 const db = require(`./db/models`);
 const { where } = require("sequelize");
 const app = express();
-const session = require('express-session');
-const genres = require("./db/models/genres");
-const e = require("express");
 const igdb = require('igdb-api-node').default;
 
-const client = igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7');
 
- 
-  const themeObj = {44:  'Romance' ,
-  1: 'Action' ,
-  17:'Fantasy' ,
-  18:  'Science_fiction' ,
-  19: 'Horror' ,
-  20:  'Thriller' ,
-  21:  'Survival' ,
-  22:  'Historical' ,
-  23:  'Stealth' ,
-  27: 'Comedy' 
+const themeObj = {
+  44: 'Romance',
+  1: 'Action',
+  17: 'Fantasy',
+  18: 'Science_fiction',
+  19: 'Horror',
+  20: 'Thriller',
+  21: 'Survival',
+  22: 'Historical',
+  23: 'Stealth',
+  27: 'Comedy',
+  28: 'Business',
+  31: 'Non_fiction',
+  33: 'Sandbox',
+  34: 'Educational',
+  34: 'Kids',
+  38: 'Open_world',
+  39: 'Warfare',
+  40: 'Party',
+  41: 'FX',
+  42: 'Erotic',
+  43: 'Mystery',
+  44: 'Romance'
+
 }
 
 const reversedThemeObj = {
@@ -33,7 +42,19 @@ const reversedThemeObj = {
   Survival: 21,
   Historical: 22,
   Stealth: 23,
-  Comedy: 27
+  Comedy: 27,
+  Business: 28,
+  Non_fiction: 31,
+  Sandbox: 33,
+  Educational: 34,
+  Kids: 34,
+  Open_world: 38,
+  Warfare: 39,
+  Party: 40,
+  FX: 41,
+  Erotic: 42,
+  Mystery: 43,
+  Romance: 44,
 };
 
 
@@ -184,29 +205,33 @@ const reversedPlatformDbOBJ = {
   Meta_Quest_2: 'Meta Quest 2',
   PlayStation_4: 'PlayStation 4'
 };
-  
+
 
 
 
 
 app.use(express.json());
-app.use(cors());
-app.use(session({
-  secret: 'password',
-  resave: false,
-  saveUninitialized: true
-}))
+app.use(cors({
+  origin: 'http://127.0.0.1:5173',
+  credentials: true
+}));
+
 
 
 // Get games based on requirements
 
 
+app.post('/newUser', async (req, res) => {
+  const userId = req.headers['x-user-id']
+  await db.User.create({ id: userId })
+  await db.Genre.create({ UserId: userId })
+  await db.Platform.create({ UserId: userId })
+  await db.Theme.create({ UserId: userId })
+})
+
 app.post("/GetGamesStart", async (req, res) => {
-  // Rating
-  // Add genres to database
-  // Save platforms to local storage
 
-
+  let userId = req.headers.userid
   try {
     const { Genres, Platforms } = req.body
     let genreIds = []
@@ -225,7 +250,7 @@ app.post("/GetGamesStart", async (req, res) => {
       link += (genreIds.length > 0 ? ' & ' : '') + `platforms=(${platformIds.join(',')})`;
     }
 
-    if(link.length && link[0] !== ''){
+    if (link.length && link[0] !== '') {
       link += '&'
     }
 
@@ -249,48 +274,36 @@ app.post("/GetGamesStart", async (req, res) => {
       .request('/games')
 
     const games = await response.data.map(gameOBJ => ({ id: gameOBJ.id, name: gameOBJ.name, cover: gameOBJ.cover, summary: gameOBJ.summary /* screenshot:gameOBJ.screenshots genres:gameOBJ.genres, platforms:gameOBJ.platforms,rating:gameOBJ.aggregated_rating*/ }))
- 
+
     for (let genre of Genres) {
-   
+
       const columnName = correctDbGenres[genre];
       await db.Genre.increment(columnName, {
         by: 1,
-        where: { id: 1 }
+        where: { UserId: userId }
       })
     }
-    for(let platform of Platforms){
+    for (let platform of Platforms) {
       const columnName = platformDbOBJ[platform]
-     const platformValues = await db.Platform.findOne(
-      {
-        where:{id:1}
-      }
-     ) 
-     
-     
-     await platformValues.update({[columnName]:true})
+
+      const updatedData = { [columnName]: true }
+
+      await db.Platform.update(updatedData, { where: { UserId: userId } })
 
     }
 
-
-    let imgUrls = []
-
-
-
-    
-    const gameIds = games.filter(game => game !== undefined).map(game => game.id); 
+    const gameIds = games.filter(game => game !== undefined).map(game => game.id);
     let images = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
-    .fields(['url'])
-    .where(`game=(${gameIds.join(`,`)})`)
-    .request('/covers')
+      .fields(['url'])
+      .where(`game=(${gameIds.join(`,`)})`)
+      .request('/covers')
 
-    console.log(images.data)
 
-    
-   for(let i = 0; i < 3; i++){
-    games[i].cover = images.data[i].url.replace('t_thumb','t_1080p')
-   } 
+    for (let i = 0; i < 3; i++) {
+      games[i].cover = images.data[i].url.replace('t_thumb', 't_1080p')
+    }
 
-  console.log(games)
+    console.log(games)
     res.send(games);
 
   } catch (error) {
@@ -304,150 +317,141 @@ app.post("/GetGamesStart", async (req, res) => {
 
 app.post('/GetGamesByHistory', async (req, res) => {
 
+  let userId = req.headers.userid
 
-  const genresCount = await db.Genre.findAll()
+  try {
+    const genresCount = await db.Genre.findOne({ where: { 'UserId': userId } })
+    let sortedGenres = Object.entries(genresCount.dataValues)
+      .filter(([key]) => key !== 'id' && key !== "createdAt" && key !== "updatedAt" && key !== "UserId")
+      .sort(([, value], [, valueB]) => valueB - value)
+      .map(([genre, count]) => [correctIgdbGenres[genre], count])
 
-  let sortedGenres = Object.entries(genresCount[0].dataValues)
-    .filter(([key]) => key !== 'id' && key !== "createdAt" && key !== "updatedAt")
-    .sort(([, value], [, valueB]) => valueB - value)
-    .map(([genre, count]) => [correctIgdbGenres[genre], count])
 
-  const platform = await db.Platform.findOne({where:{id:1}})
+    const platform = await db.Platform.findOne({ where: { 'UserId': userId } })
 
     let acceptedPlatforms = Object.entries(platform.dataValues)
-    .filter(([key]) => key !== `id` && key !== "createdAt" && key !== "updatedAt")
-    .map(([platform,owned]) => [reversedPlatformDbOBJ[platform],owned])
-    .filter(([,bool]) => bool !== false)
+      .filter(([key]) => key !== `id` && key !== "createdAt" && key !== "updatedAt" && key !== 'UserId')
+      .map(([platform, owned]) => [reversedPlatformDbOBJ[platform], owned])
+      .filter(([, bool]) => bool !== false)
 
-  const totalWeight = sortedGenres.reduce((sum, [, value]) => sum + value, 0)
-  let randomNum = Math.random() * totalWeight
-  let selectedGenre
-  for (let [genre, count] of sortedGenres) {
-    randomNum -= count
-    if (randomNum <= 0) {
-      selectedGenre = genre
-      break
-    }
-
-  }
-// ```````````````````````
-  let themes = await db.Theme.findOne({where:{id:1}})
-
-  let accepetedThemes = Object.entries(themes.dataValues
-  )
-  .filter(([key,value]) => key !== `id` && key !== "createdAt" && key !== "updatedAt" && value !== 0)
-  .sort(([, value], [, valueB]) => valueB - value)
- console.log(accepetedThemes)
-    let themeCount = 0
-    for(let i of accepetedThemes){
-themeCount += i[1] 
-    }
-let themeIds = []
-let counter = 0
-if(themeCount >= 8){
-for(let i of accepetedThemes){
-  if(counter < 2){
-  themeIds.push(reversedThemeObj[i[0]])
-  counter++
-  }
-
-  else{break}
-}}
-
-
-
-
-
-  let genre = genreOBJ[selectedGenre]
-
-  
-  let platformId = []
-  for(let plat of acceptedPlatforms){
-    platformId.push(platformOBJ[plat[0]])
-  }
-  
-  let link = `aggregated_rating > 70 & category=0`
-
-if(platformId.length && platformId[0] !== ''){
- 
-  link +=` & platforms=(${platformId.join(',')})`
- 
-}
-
-if(genre){  
-  link += ` & genres=(${genre})`
-}
-console.log(themeIds)
-
-if(themeIds.length && platformId[0] !== ''){
-  link += ` & themes=(${themeIds.join(',')})`
-}
-
-  console.log(themeIds.length)
-
-  const countResponse = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
-    .fields(['id'])
-    .limit(1)
-    .where(link)
-    .request('/games/count');
-
-  const totalCount = countResponse.data.count;
-
-
-  
-  const randomNum1 = Math.floor(Math.random() * totalCount) + 1;
-
-   
-
-  const response = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
-    .fields(['id', 'name', 'genres', 'cover', 'summary','themes'])
-    .limit(3)
-    .offset(randomNum1)
-    .where(link)
-    .request('/games')
-
-
-
-console.log(response.config)
-  const games = await response.data.map(gameOBJ => ({ id: gameOBJ.id, name: gameOBJ.name, cover: gameOBJ.cover, summary: gameOBJ.summary, Theme:gameOBJ.themes /* screenshot:gameOBJ.screenshots genres:gameOBJ.genres, platforms:gameOBJ.platforms,rating:gameOBJ.aggregated_rating*/ }))
-  
-
-  
-
-
-
-  let imgUrls = []
-
-
-
-
-  
-  const gameIds = games.map(game => game.id); 
-  let images = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
-    .fields(['url','game'])
-    .where(`game=(${gameIds.join(`,`)})`)
-    .request('/covers')
-
-    
-    
-   for(let i = 0; i < 3; i++){
-    for(let j = 0; j < 3; j++){
-      if(games[i].id == images.data[j].game){
-        games[i].cover = images.data[j].url.replace('t_thumb','t_1080p')
+    const totalWeight = sortedGenres.reduce((sum, [, value]) => sum + value, 0)
+    let randomNum = Math.random() * totalWeight
+    let selectedGenre
+    for (let [genre, count] of sortedGenres) {
+      randomNum -= count
+      if (randomNum <= 0) {
+        selectedGenre = genre
+        break
       }
 
     }
-   
-   } 
+    let themes = await db.Theme.findOne({ where: { 'UserId': userId } })
+
+    let accepetedThemes = Object.entries(themes.dataValues
+    )
+      .filter(([key, value]) => key !== `id` && key !== "createdAt" && key !== "updatedAt" && key !== "updatedAt" && value !== 0)
+      .sort(([, value], [, valueB]) => valueB - value)
+    let themeCount = 0
+    for (let i of accepetedThemes) {
+      themeCount += i[1]
+    }
+    let themeIds = []
+    let counter = 0
+    if (themeCount >= 8) {
+      for (let i of accepetedThemes) {
+        if (counter < 2) {
+          themeIds.push(reversedThemeObj[i[0]])
+          counter++
+        }
+
+        else { break }
+      }
+    }
 
 
-// Assign cover URLs to the games
-
-  
 
 
-   
-  res.send(games)
+
+    let genre = genreOBJ[selectedGenre]
+
+
+    let platformId = []
+    for (let plat of acceptedPlatforms) {
+      platformId.push(platformOBJ[plat[0]])
+    }
+
+    let link = `aggregated_rating > 70 & category=0`
+
+    if (platformId.length && platformId[0] !== '') {
+
+      link += ` & platforms=(${platformId.join(',')})`
+
+    }
+
+    if (genre) {
+      link += ` & genres=(${genre})`
+    }
+
+
+    if (themeIds.length && themeIds[0] !== '') {
+      link += ` & themes=(${themeIds.join(',')})`
+    }
+
+    const countResponse = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
+      .fields(['id'])
+      .limit(1)
+      .where(link)
+      .request('/games/count');
+
+
+
+    const totalCount = countResponse.data.count;
+
+
+
+    const randomNum1 = Math.floor(Math.random() * totalCount) + 1;
+
+
+
+    const response = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
+      .fields(['id', 'name', 'genres', 'cover', 'summary', 'themes'])
+      .limit(3)
+      .offset(randomNum1)
+      .where(link)
+      .request('/games')
+
+    const games = await response.data.map(gameOBJ => ({ id: gameOBJ.id, name: gameOBJ.name, cover: gameOBJ.cover, summary: gameOBJ.summary, Theme: gameOBJ.themes /* screenshot:gameOBJ.screenshots genres:gameOBJ.genres, platforms:gameOBJ.platforms,rating:gameOBJ.aggregated_rating*/ }))
+
+    const gameIds = games.map(game => game.id);
+    let images = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
+      .fields(['url', 'game'])
+      .where(`game=(${gameIds.join(`,`)})`)
+      .request('/covers')
+
+
+
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (games[i].id == images.data[j].game) {
+          games[i].cover = images.data[j].url.replace('t_thumb', 't_1080p')
+        }
+
+      }
+
+    }
+
+
+    // Assign cover URLs to the games
+
+
+
+
+
+    res.send(games)
+  } catch (error) {
+    console.error(error)
+  }
+
 
 
 })
@@ -460,12 +464,12 @@ app.post('/GetGameDetails/:id', async (req, res) => {
     const id = req.params.id
 
     const response = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
-      .fields(['id', 'name', 'genres','themes', 'summary', 'platforms', 'involved_companies', 'screenshots', `videos`, 'aggregated_rating', 'websites'])
+      .fields(['id', 'name', 'genres', 'themes', 'summary', 'platforms', 'involved_companies', 'screenshots', `videos`, 'aggregated_rating', 'websites'])
       .where(`id=(${id})`)
       .request('/games')
 
 
-    const games = await response.data.map(gameOBJ => ({ id: gameOBJ.id, name: gameOBJ.name, genres: gameOBJ.genres, themes:gameOBJ.themes, platforms: gameOBJ.platforms, rating: gameOBJ.aggregated_rating, cover: gameOBJ.cover, Company: gameOBJ.involved_companies, screenshots: gameOBJ.involved_companies, summary: gameOBJ.summary, wesbite: gameOBJ.websites, videos: gameOBJ.videos }))
+    const games = await response.data.map(gameOBJ => ({ id: gameOBJ.id, name: gameOBJ.name, genres: gameOBJ.genres, themes: gameOBJ.themes, platforms: gameOBJ.platforms, rating: gameOBJ.aggregated_rating, cover: gameOBJ.cover, Company: gameOBJ.involved_companies, screenshots: gameOBJ.involved_companies, summary: gameOBJ.summary, wesbite: gameOBJ.websites, videos: gameOBJ.videos }))
 
 
     const trailer = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
@@ -473,45 +477,33 @@ app.post('/GetGameDetails/:id', async (req, res) => {
       .where(`game=(${games[0].id})`)
       .request('/game_videos')
 
-   
-    if(games[0].videos){
-  games[0].trailer = `https://www.youtube.com/embed/${trailer.data[0].video_id}?autoplay=1&mute=1`}
+
+    if (games[0].videos) {
+      games[0].trailer = `https://www.youtube.com/embed/${trailer.data[0].video_id}?autoplay=1&mute=0`
+    }
 
     let ss = []
 
-      let images = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
-        .fields(['url'])
-        .where(`game=(${games[0].id})`)
-        .limit(5)
-        .request('/screenshots')
-      for(let i of images.data){
-        i = i.url.replace('t_thumb','t_1080p')
-        ss.push(i)
-        }
-   
-      games[0].pics = ss
+    let images = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
+      .fields(['url'])
+      .where(`game=(${games[0].id})`)
+      .limit(5)
+      .request('/screenshots')
+    for (let i of images.data) {
+      i = i.url.replace('t_thumb', 't_1080p')
+      ss.push(i)
+    }
 
-      let cover = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
+    games[0].pics = ss
+
+    let cover = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
       .fields(['url'])
       .where(`game=${games[0].id}`)
       .request('/covers')
-    
-     
-  games[0].hero = cover.data[0].url.replace('t_thumb', 't_1080p')
-  
 
 
-  // let websites = await igdb('vdmp7wso1cq6cpdfs1o0ktpievtxgc', 'sp0xdjb0z8gbj0n1c28hfd6mqfous7')
-  // .fields(['url'])
-  // .where(`game=${games[0].id}`)
-  // .request('/websites')
-  
+    games[0].hero = cover.data[0].url.replace('t_thumb', 't_1080p')
 
-  // let urls = []
-  // for(let i of websites.data){
-  //   urls.push(i)
-  // }
-  // games[0].websites = urls
     res.send(games)
   } catch (error) {
     res.status(500).json({ errorMessage: error.message })
@@ -520,28 +512,29 @@ app.post('/GetGameDetails/:id', async (req, res) => {
 
 //Add Game to Server
 app.post('/LikeGame', async (req, res) => {
+  let userId = req.headers.userid
   try {
-    const { GameId, Name,Img,Genres,Themes} = req.body
-    ImageBig = Img.replace('t_thumb', 't_1080p')
+    const { GameId, Genres, Themes, Img } = req.body
     for (let genre of Genres) {
       const rightGenre = reversedGenreObj[genre]
       await db.Genre.increment(correctDbGenres[rightGenre], {
         by: 1,
-        where: { id: 1 }
+        where: { 'UserId': userId }
 
       })
 
-    }    
+    }
 
-    for(let theme of Themes ){
+
+    for (let theme of Themes) {
       const dbTheme = themeObj[theme]
       await db.Theme.increment(dbTheme,
-        {by:1,where:{id:1}}
+        { by: 1, where: { 'UserId': userId } }
       )
     }
 
-    await db.Liked_Game_Info.create({ GameId, Name, Img,GameId})
-    
+    await db.likedGames.create({ UserId: userId, gameId: GameId, gameImg: Img })
+
     res.status(200).send('Game Liked')
   } catch (error) {
     res.status(500).json({ errorMessage: error })
@@ -551,7 +544,7 @@ app.post('/LikeGame', async (req, res) => {
 
 app.get('/AllLikedGames', async (req, res) => {
 
-  const allGames = await db.Liked_Game_Info.findAll({ attributes: ['Name', 'Img','GameId'] })
+  const allGames = await db.Liked_Game_Info.findAll({ attributes: ['Name', 'Img', 'GameId'] })
 
   res.send(allGames)
 })
@@ -567,8 +560,12 @@ app.get('/RecentlyLikedGames', async (req, res) => {
 
 
 
+
+
+
+
 db.sequelize.sync().then(() => {
-  app.listen(5000,'0.0.0.0', () => {
+  app.listen(5000, () => {
     console.log(`server is up and running on port 5000`);
   });
 });

@@ -21,12 +21,14 @@ function GameDisplay(){
     }
 
     const searchAgain = async () => {
-
+        let userId = localStorage.getItem('userId')
         console.log('reached')
         SetLoading(true)
         let game = await fetch(`http://localhost:5000/GetGamesByHistory`, {
             method:'POST',
-            headers:{'Content-Type':'application/json'}
+            headers:{'Content-Type':'application/json',
+                'userId':userId
+            }
         })
         .then(data => data.json())
         console.log(game)

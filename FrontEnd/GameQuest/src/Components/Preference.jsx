@@ -83,10 +83,10 @@ const platformOptions  = [
     let submitHandler = async () =>{
       SetLoading(true)
         const preferenceBody = {Genres:GenresState,Platforms:PlatformState}
-      
+        let userId = localStorage.getItem(`userId`)
         let games = await fetch(`http://localhost:5000/GetGamesStart`, {
           method:'POST',
-          headers: {'Content-Type':'application/json'},
+          headers: {'Content-Type':'application/json','userId':userId},
           body:JSON.stringify(preferenceBody)
         })
         .then(data => data.json())
