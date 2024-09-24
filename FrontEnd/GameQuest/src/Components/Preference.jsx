@@ -90,8 +90,9 @@ const platformOptions  = [
           body:JSON.stringify(preferenceBody)
         })
         .then(data => data.json())
-       
+        
         SetLoading(false)
+        console.log('NEWCSL',games)
         navigate('/GameDisplay', {state:games})
     }
 

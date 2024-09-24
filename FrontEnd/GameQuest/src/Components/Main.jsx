@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom'
 import Preference from './Preference'
 import howItWorks from '../assets/Image/Howitworkscard.png'
 
+
 function Main() {
   
   const { scrollYProgress } = useScroll();
@@ -40,7 +41,7 @@ function Main() {
   return (
     <>
       <main className='bg-black flex-col'>
-        <header className="bg-background bg-contain text-white text-4xl font-bold w-screen h-screen  flex  ">
+        <header className="bg-background  text-white text-4xl font-bold w-screen h-screen  flex  ">
           <div className='flex '>
             <div className='p-36 w-8/12 '>
               
@@ -71,8 +72,8 @@ function Main() {
           </div>
         </header>
 
-        <section className='bg-black text-white bg-cover font-bold w-screen h-2/6 flex scale-x-[-1]' >
-          <div className='scale-x-[-1]  w-10/12 h-6/6 flex items-center justify-between m-60 '>
+        <section className='bg-background-top-blue bg-cover text-white font-bold w-screen  flex scale-x-[-1]' >
+          <div className='scale-x-[-1] pt-96 w-10/12 h-6/6 flex items-center justify-between m-60 '>
             <img src={howItWorks} className='w-4/6 mr-40 drop-shadow-[1px_1px_1px_rgba(255,255,255,0.5)] hover:drop-shadow-[0_3px_6px_rgba(255,255,255,0.5)] hover:-rotate-1 transition-all duration-100 ease-linear'></img>
             <div className='w-4/6'>
               <h2 className='text-6xl mb-10'>How It All Works</h2>

@@ -18,7 +18,8 @@ export default {
         'hero':"url('./src/assets/Image/scattered-forcefields.svg')",
         'background':"url('./src/assets/Image/layered-waves-haikei.svg')",
         'background-sec':"url('./src/assets/Image/layered-waves-haikei-sec.svg')",
-        'background-autumn':"url('./src/assets/Image/blob-scene-haikei.svg')"
+        'background-autumn':"url('./src/assets/Image/blob-scene-haikei.svg')",
+        'background-top-blue':"url('./src/assets/Image/layered-waves-haikei-TopBlie.svg')"
       },
       backgroundColor:{
         'redYellow':"background: linear-gradient(180deg, rgba(255,204,0,1) 11%, rgba(255,0,0,1) 54%, rgba(255,0,0,1) 55%);"

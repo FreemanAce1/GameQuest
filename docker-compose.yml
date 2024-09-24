@@ -10,7 +10,7 @@ services:
     environment:
       - DATABASE_URL=sqlite3:///db/dev.db
       - BACKEND_URL=http://backend:5000
-    command: npm start --host 0.0.0.0   
+    command: npm start --host 192.168.1.205
   frontend:
     build: ./FrontEnd/GameQuest   
     ports:

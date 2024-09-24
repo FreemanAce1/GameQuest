@@ -7,6 +7,7 @@ function GameDisplay(){
     const navigate = useNavigate()
     const gameData = location.state
     const [Loading,SetLoading] = useState(false)
+    console.log(gameData)
 
     let gameDetails = async (num) => {
         const game = gameData[num].id
@@ -37,7 +38,8 @@ function GameDisplay(){
 
     }
     const LikedGames = async () => {
-        const Liked = await fetch(`http://localhost:5000/AllLikedGames`)
+        const userId = localStorage.getItem('userId')
+        const Liked = await fetch(`http://localhost:5000/AllLikedGames/${userId}`)
         .then(data => data.json())
        
         navigate(`/likedGames`, {state:Liked})
@@ -46,7 +48,7 @@ function GameDisplay(){
 
     console.log(gameData)
     return (
-        <><div className="bg-background-autumn bg-cover h-full">
+        <><div className="bg-background-autumn bg-cover h-screen flex justify-around flex-col gap-16">
             <div className="flex-col justify-center w-50">
                 <h1 className="text-white text-7xl font-bold p-5 w-screen text-center  "> Select A Game To Learn More or Search Again </h1>
                 <div className="flex justify-around">
@@ -55,7 +57,7 @@ function GameDisplay(){
             </div>
 
             </div>
-            <div className="flex justify-around pt-32">
+            <div className="flex justify-around">
                 <div className="w-96 mb-20  flex justify-center  items-center hover:scale-110  hover:drop-shadow-[0_3px_6px_rgba(255,255,255,0.5)]  cursor-pointer  transition-all" onClick={ () => gameDetails(0)}>
                      <img className='rounded-sm' src={gameData[0].cover}></img>
                 </div>

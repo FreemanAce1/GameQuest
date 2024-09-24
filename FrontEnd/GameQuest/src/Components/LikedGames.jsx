@@ -8,8 +8,8 @@ function LikedGames(){
     const gameList = location.state
 
     let likedGames = async () => {
-
-        const likedGames = await fetch('http://localhost:5000/AllLikedGames')
+        const userId = localStorage.getItem('userId')
+        const likedGames = await fetch(`http://localhost:5000/AllLikedGames/${userId}`)
         .then((data) => data.json())
         console.log(likedGames)
     }
@@ -27,13 +27,19 @@ function LikedGames(){
 
         navigate(`/GameDetails`,{state:data})
     }
+
+    const goBack = async () => {
+
+        navigate(-1)
+    }
+
     return (
         <>
-        <div className="bg-background bg-cover h-screen">
-        <button onClick={() => goBack()} className="font-bold text-2xl rounded-full justify-center items-center p-2 mt-7 w-36 mb-10 text-white bg-gradient-to-tr from-siteRed via-siteRed to-yellow-300">Go Back</button>
-            <div className="h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"  >
+        <div className="bg-background bg-cover h-screen overflow-hidden p-10">
+        <button onClick={() => goBack()} className="font-bold text-2xl rounded-full justify-center items-center p-2  w-36 mb-10 text-white bg-gradient-to-tr from-siteRed via-siteRed to-yellow-300">Go Back</button>
+            <div className="h-full grid  lg:grid-cols-5  gap-1"  >
             {gameList.map((cover) => (
-                   <img src={cover.Img} onClick={() => gameDetails(cover.GameId)} className="w-64 p-4  flex justify-center items-center hover:scale-110  hover:drop-shadow-[0_3px_6px_rgba(255,255,255,0.5)]  cursor-pointer" ></img>
+                   <img src={cover.gameImg} onClick={() => gameDetails(cover.gameId)} className="w-64 m-5 p-4 flex justify-center items-center hover:scale-110  hover:drop-shadow-[0_3px_6px_rgba(255,255,255,0.5)]  cursor-pointer" ></img>
                 ))}
 
             </div>
