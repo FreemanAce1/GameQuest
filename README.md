@@ -19,5 +19,5 @@ Game Quest is a dynamic web application that helps you discover new video games 
 * **Frontend:**
     * React
     * Bootstrap
-# GameQuest
-# GameQuest
+
+ run npm start on backend and npm run dev on frontend/gamequest
